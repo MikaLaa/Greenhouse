@@ -19,7 +19,7 @@ void setup() {
   pinMode(motorBPin_B, OUTPUT); //speed
   delay(500);
   // initialize the lcd 
-   lcd.init();               
+  lcd.init();               
   lcd.backlight();
   lcd.setCursor(1,0);
   lcd.print("Starting");
