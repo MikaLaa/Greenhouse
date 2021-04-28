@@ -13,13 +13,9 @@ LiquidCrystal_I2C lcd(0x27,20,4);  // set the LCD address to 0x27
 unsigned int result_1;
 unsigned int result_2;
 
-void TaskUpdateHumidity( void *pvParameters );
-
 void setup() 
 {
  
-
-
    xTaskCreate(
     TaskUpdateHumidity
     ,  "TaskUpdateHumidity"  // A name just for humans
@@ -28,9 +24,17 @@ void setup()
     ,  1  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
     ,  NULL );
 
-     xTaskCreate(
+    xTaskCreate(
     RunMotors
     ,  "RunMotors"  // A name just for humans
+    ,  128  // This stack size can be checked & adjusted by reading the Stack Highwater
+    ,  NULL
+    ,  1  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
+    ,  NULL );
+
+    xTaskCreate(
+    Task_LCD
+    ,  "Task_LCD"  // A name just for humans
     ,  128  // This stack size can be checked & adjusted by reading the Stack Highwater
     ,  NULL
     ,  1  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
@@ -39,16 +43,11 @@ void setup()
 }
 
 
-
-
-
 void loop() {
-  
-  delay(60000);// Odota minuutti
+ ;
 }
 
-
-void TaskUpdateHumidity( void *pvParameters __attribute__((unused)) )  // This is a Task.
+void Task_LCD( void *pvParameters __attribute__((unused)) )  // This is a Task.
 {
   // initialize the lcd 
   lcd.init();               
@@ -57,8 +56,6 @@ void TaskUpdateHumidity( void *pvParameters __attribute__((unused)) )  // This i
 
   for (;;) // A Task shall never return or exit.
   {
-    result_1 = analogRead(SENS_1);
-    result_2 = analogRead(SENS_2);
     lcd.setCursor(1,0);
     lcd.print("SENSOR_1");
     lcd.setCursor(10,0);
@@ -70,6 +67,16 @@ void TaskUpdateHumidity( void *pvParameters __attribute__((unused)) )  // This i
     lcd.print(result_2);
   }
 
+    vTaskDelay(4000);  // one tick delay (15ms) in between reads for stability 30s
+}
+void TaskUpdateHumidity( void *pvParameters __attribute__((unused)) )  // This is a Task.
+{
+
+  for (;;) // A Task shall never return or exit.
+  {
+    result_1 = analogRead(SENS_1);
+    result_2 = analogRead(SENS_2);
+  }
     vTaskDelay(2000);  // one tick delay (15ms) in between reads for stability 30s
 }
 
